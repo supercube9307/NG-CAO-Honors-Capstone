@@ -6,8 +6,8 @@ transform = 1
 
 if __name__ == '__main__':
 
-    filename = r"C:\Users\antho\Videos\NG\Testing_4-4\Off-Axis_Images\TEST3_negY_bCF_lightOn_edgeOn.raw"
-
+    filename = input("Input path to file")
+    
     if transform == 0:
         for i in range(0,9999):
             raw_file1 = filename #+ str(i)
