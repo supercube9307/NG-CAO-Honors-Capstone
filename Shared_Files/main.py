@@ -64,6 +64,7 @@ if whichFile == 0:
     """
     returns = fld.files_in(fldFile,fldBright,fldDark,4)
     print(returns)
+    
 elif whichFile == 1:
     """
     User-defined variables.

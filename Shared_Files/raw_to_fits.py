@@ -31,28 +31,58 @@ if __name__ == '__main__':
                 file_paths.remove(file)
 
         if len(file_paths) == 0:
-            print("Please select a file or folder with .raw files")
+            print("Please select a file or folder with .raw")
         else:
             break
-
-    averages = []
 
     for filename in file_paths:
     
         print("Converting " + filename)
 
+        if transform == 0:
+            for i in range(0,9999):
+                raw_file1 = filename #+ str(i)
+                for j in range(0,99): 
+                    raw_file1 = raw_file1 + '-' + str(j) + '.raw'
 
-        with fits.open(filename) as hdul:
-            x_length = hdul[1].header["NAXIS1"]
-            y_length = hdul[1].header["N"]
+                    if os.path.isfile(raw_file1):
+                        raw_imarray = np.fromfile(raw_file1, dtype='uint16')
+                        reshaped_raw_imarray = np.reshape(raw_imarray, (1944,2592))
+                        fits_file = raw_file1.split('.')[0]+'.fits'
+                        hdu = fits.ImageHDU(reshaped_raw_imarray)
+                        prim = fits.PrimaryHDU()
+                        hdul = fits.HDUList([prim,hdu])
+                        hdu.writeto(fits_file, overwrite=True)
 
-            if len(averages) == 0:
-                averages = np.empty(x_length,y_length)
+        if transform == 1:
             
-            for x_index in range(x_length):
-                for y_index in range(y_length):
-                    averages += hdul[1].data[y_index][x_index]
+            raw_file1 = filename #+ str(j) + '.Raw'
+            if os.path.isdir(path_input):
+                raw_file1 = path_input+"\\"+raw_file1
 
-        averages /= len(file_paths)
+            raw_imarray = np.fromfile(raw_file1, dtype='uint16')
+            reshaped_raw_imarray = np.reshape(raw_imarray, (1944,2592))
+            
+            fits_file = raw_file1.split('.')[0]+'.fits'
+            
+            hdu = fits.ImageHDU(reshaped_raw_imarray)
+            prim = fits.PrimaryHDU()
+            hdul = fits.HDUList([prim,hdu])
+            hdu.writeto(fits_file, overwrite=True)
 
-    print(averages)
+        if transform == 2:
+            for i in range(0,9999):
+                raw_file1 = filename + str(i) + '-'
+                for j in range(0,40):
+                    raw_file2 = raw_file1 + str(j) + '.Raw'
+
+                    if os.path.isfile(raw_file2):
+                        raw_imarray = np.fromfile(raw_file2, dtype='uint16')
+                        reshaped_raw_imarray = np.reshape(raw_imarray, (int(1944/2 - 12),int(2592/2),2))
+                        fits_file = raw_file2.split('.')[0]+'.fits'
+                        hdu = fits.ImageHDU(reshaped_raw_imarray[:,:,0])
+                        prim = fits.PrimaryHDU()
+                        hdul = fits.HDUList([prim,hdu])
+                        hdu.writeto(fits_file, overwrite=True)
+
+        # print(fits_file)
