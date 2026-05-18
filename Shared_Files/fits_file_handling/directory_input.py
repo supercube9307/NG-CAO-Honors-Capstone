@@ -9,15 +9,19 @@ def get_directory_input(expected_file_type="fits"):
     path_verified = False
     while path_verified == False:
 
-        path_input = input(f"Input path to folder containing .{expected_file_type} files: ")
+        path_input = input(f"Input path to .{expected_file_type} file or folder containing .{expected_file_type} files: ")
 
         if not(os.path.exists(path_input)):
             print("Please select a valid file path")
             continue
         
         if os.path.isfile(path_input):
-            print("Please input a path to a folder")
-            continue
+            print("Parsing File")
+            path_input, file = path_input.rsplit("\\",1)
+            file_names.append(file)
+            return(file_names, path_input)
+
+
 
         print("Parsing Folder")
         for file in os.listdir(path_input):
