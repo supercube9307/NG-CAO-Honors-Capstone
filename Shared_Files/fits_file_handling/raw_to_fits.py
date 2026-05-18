@@ -1,41 +1,15 @@
 from astropy.io import fits
 import numpy as np
 import os
+from directory_input import get_directory_input
 
 transform = 1
 
 if __name__ == '__main__':
 
-    path_verified = False
-    file_paths = [];
-    while path_verified == False:
+    file_names, path_input = get_directory_input("raw")
 
-        path_input = input("Input path to file or folder: ")
-
-        if not(os.path.exists(path_input)):
-            print("Please select a valid file path")
-            continue
-        
-        if os.path.isfile(path_input):
-            print("Parsing File")
-            file_paths.append(path_input)
-
-        elif os.path.isdir(path_input):
-            print("Parsing Folder")
-            for file in os.listdir(path_input):
-                file_paths.append(file)
-
-        for file in file_paths:
-            if file.split(".")[-1] != "raw":
-                print("Ingoring " + file)
-                file_paths.remove(file)
-
-        if len(file_paths) == 0:
-            print("Please select a file or folder with .raw")
-        else:
-            break
-
-    for filename in file_paths:
+    for filename in file_names:
     
         print("Converting " + filename)
 
@@ -84,5 +58,3 @@ if __name__ == '__main__':
                         prim = fits.PrimaryHDU()
                         hdul = fits.HDUList([prim,hdu])
                         hdu.writeto(fits_file, overwrite=True)
-
-        # print(fits_file)

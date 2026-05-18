@@ -1,37 +1,38 @@
 from astropy.io import fits
 import numpy as np
 import os
+from directory_input import get_directory_input
 
-def get_directory_input():
+# def get_directory_input():
 
-    file_names = []
-    path_verified = False
-    while path_verified == False:
+#     file_names = []
+#     path_verified = False
+#     while path_verified == False:
 
-        path_input = input("Input path to folder containing .fits files: ")
+#         path_input = input("Input path to folder containing .fits files: ")
 
-        if not(os.path.exists(path_input)):
-            print("Please select a valid file path")
-            continue
+#         if not(os.path.exists(path_input)):
+#             print("Please select a valid file path")
+#             continue
         
-        if os.path.isfile(path_input):
-            print("Please input a path to a folder")
-            continue
+#         if os.path.isfile(path_input):
+#             print("Please input a path to a folder")
+#             continue
 
-        print("Parsing Folder")
-        for file in os.listdir(path_input):
-            file_names.append(file)
+#         print("Parsing Folder")
+#         for file in os.listdir(path_input):
+#             file_names.append(file)
 
-        for file in file_names:
-            if file.split(".")[-1] != "fits":
-                print("Ingoring " + file)
-                file_names.remove(file)
+#         for file in file_names:
+#             if file.split(".")[-1] != "fits":
+#                 print("Ingoring " + file)
+#                 file_names.remove(file)
 
-        if len(file_names) == 0:
-            print("Please select a file or folder with .fits files")
-            continue
-        else:
-            return(file_names, path_input)
+#         if len(file_names) == 0:
+#             print("Please select a file or folder with .fits files")
+#             continue
+#         else:
+#             return(file_names, path_input)
 
         
 def average_fits(file_names, path_input):
