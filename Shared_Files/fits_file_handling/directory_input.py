@@ -17,7 +17,6 @@ def get_directory_input(expected_file_type="fits"):
         
         if os.path.isfile(path_input):
             print("Parsing File")
-            print(path_input)
             path_input, file = path_input.rsplit("/",1)
             file_names.append(file)
             return(file_names, path_input)
