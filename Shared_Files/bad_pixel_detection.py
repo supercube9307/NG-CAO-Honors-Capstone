@@ -45,6 +45,6 @@ if __name__ == '__main__':
     file_names, path_input = get_directory_input()
     
     for file in file_names:
-        file_path =  path_input+"\\"+file
+        file_path =  path_input+"/"+file
         analyze_file(file_path, operation_mode)
 
