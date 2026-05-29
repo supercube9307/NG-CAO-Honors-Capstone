@@ -34,14 +34,14 @@ def pretty_output(bool_2d):
 
 def get_bool_2d_locs(bool_2d):
 
-    x_len = len(bool_2d)
-    y_len = len(bool_2d[0])
+    x_len = len(bool_2d[0])
+    y_len = len(bool_2d)
     output_list = []
 
     for y_index in range(y_len):
         for x_index in range(x_len):
 
-            if bool_2d[x_index][y_index] == True:
+            if bool_2d[y_index][x_index] == True:
                 output_list.append([x_index,y_index])
 
     return(output_list)
