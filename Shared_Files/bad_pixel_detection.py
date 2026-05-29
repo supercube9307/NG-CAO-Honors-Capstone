@@ -11,14 +11,28 @@ def analyze_file(file_path, operation_mode):
             file_data = hdul[0].data
         
         if operation_mode == 0:
-            dark_bp_locs = fixedbp._compute_fixedbp_from_dark(file_data,5)
-            print(pretty_output(dark_bp_locs))
+            sd_threshold = input("Input Standard Deviations above which pixels should be discarded: ")
+            dark_bp_locs = fixedbp._compute_fixedbp_from_dark(file_data,sd_threshold)
+            pretty_output(dark_bp_locs)
             
         if operation_mode == 1:
-            flat_bp_locs = fixedbp._compute_fixedbp_from_flat(file_data,0.1,16)
-            print(pretty_output(flat_bp_locs))
+            percentage_threshold = int(input("Input Percentage below which pixels should be discarded (0-100): "))/100
+            flat_bp_locs = fixedbp._compute_fixedbp_from_flat(file_data,percentage_threshold,32)
+            pretty_output(flat_bp_locs)
 
 def pretty_output(bool_2d):
+    
+    output_list = get_bool_2d_locs(bool_2d)
+
+    if len(output_list) == 0:
+        print("No Bad Pixels found within threshold")
+        return
+    
+    for bp_loc in output_list:
+        print(f"Bad Pixel found at: {bp_loc}")
+
+
+def get_bool_2d_locs(bool_2d):
 
     x_len = len(bool_2d)
     y_len = len(bool_2d[0])
@@ -31,6 +45,8 @@ def pretty_output(bool_2d):
                 output_list.append([x_index,y_index])
 
     return(output_list)
+
+
 
 if __name__ == '__main__':
 
