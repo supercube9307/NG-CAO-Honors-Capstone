@@ -11,7 +11,7 @@ def analyze_file(file_path, operation_mode):
             file_data = hdul[0].data
         
         if operation_mode == 0:
-            sd_threshold = input("Input Standard Deviations above which pixels should be discarded: ")
+            sd_threshold = int(input("Input Standard Deviation(s) above which pixels should be discarded: "))
             dark_bp_locs = fixedbp._compute_fixedbp_from_dark(file_data,sd_threshold)
             pretty_output(dark_bp_locs)
             
@@ -38,8 +38,8 @@ def get_bool_2d_locs(bool_2d):
     y_len = len(bool_2d[0])
     output_list = []
 
-    for x_index in range(x_len):
-        for y_index in range(y_len):
+    for y_index in range(y_len):
+        for x_index in range(x_len):
 
             if bool_2d[x_index][y_index] == True:
                 output_list.append([x_index,y_index])
