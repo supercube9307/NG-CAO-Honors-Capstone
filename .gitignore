@@ -1,2 +1,3 @@
 /.venv/*
 /Shared_Files/Bad_Pixel_Calibration_Frames
+/output.csv

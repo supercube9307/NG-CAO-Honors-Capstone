@@ -31,6 +31,24 @@ def pretty_output(bool_2d):
     for bp_loc in output_list:
         print(f"Bad Pixel found at: {bp_loc}")
 
+    file_output_required = input("Would you like to save these locations to a file? (Y/N): ").lower()
+    if file_output_required:
+        output_csv_file(output_list)
+
+def output_csv_file(output_list):
+
+    with open("output.csv", "w") as output_file:
+
+        output_text = ""
+        for bp_loc in output_list:
+
+            bp_text = str(bp_loc[0])+","+str(bp_loc[1])+"\n"
+            output_text += bp_text
+
+        output_file.write(output_text)
+
+    print("File 'output.csv' created in " + os.getcwd())
+
 
 def get_bool_2d_locs(bool_2d):
 
