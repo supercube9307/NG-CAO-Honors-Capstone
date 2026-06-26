@@ -1,3 +1,5 @@
 /.venv/*
 /Shared_Files/Bad_Pixel_Calibration_Frames
 /output.csv
+/C_gain_array.csv
+/C_offset_array.csv

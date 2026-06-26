@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 import bp_util.fixedbp as fixedbp
-from fits_file_handling.directory_input import get_directory_input
+import fits_file_handling.directory_input as di
 
 def analyze_file(file_path, operation_mode):
 
@@ -31,24 +31,7 @@ def pretty_output(bool_2d):
     for bp_loc in output_list:
         print(f"Bad Pixel found at: {bp_loc}")
 
-    file_output_required = input("Would you like to save these locations to a file? (Y/N): ").lower()
-    if file_output_required:
-        output_csv_file(output_list)
-
-def output_csv_file(output_list):
-
-    with open("output.csv", "w") as output_file:
-
-        output_text = ""
-        for bp_loc in output_list:
-
-            bp_text = str(bp_loc[0])+","+str(bp_loc[1])+"\n"
-            output_text += bp_text
-
-        output_file.write(output_text)
-
-    print("File 'output.csv' created in " + os.getcwd())
-
+    di.output_csv_file(output_list)
 
 def get_bool_2d_locs(bool_2d):
 
@@ -76,7 +59,7 @@ if __name__ == '__main__':
             break
         print("Invalid Input")
 
-    file_names, path_input = get_directory_input()
+    file_names, path_input = di.get_directory_input()
     
     for file in file_names:
         file_path =  path_input+"/"+file

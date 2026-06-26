@@ -1,6 +1,31 @@
 import os
 
-def get_directory_input(expected_file_type="fits"):
+def output_csv_file(output_list, file_name="output.csv"):
+
+    file_output_required = None
+    while file_output_required != "y" and file_output_required != "n":
+
+        file_output_required = input("Would you like to save to a file? (Y/N): ").lower()
+        
+        if file_output_required == "y" or file_output_required == "n":
+            continue
+        print("Please input a valid response")
+            
+    if file_output_required == "y":
+        with open(file_name, "w") as output_file:
+
+            output_text = ""
+            for line in output_list:
+
+                line = list(map(str, line))
+                line_text = ",".join(line)+"\n"
+                output_text += line_text
+
+            output_file.write(output_text)
+
+        print(f"File '{file_name}' created in " + os.getcwd())
+
+def get_directory_input(expected_file_type="fits",message=""):
 
     if expected_file_type[0] == ".":
         expected_file_type = expected_file_type.lstrip(".")
@@ -8,8 +33,11 @@ def get_directory_input(expected_file_type="fits"):
     file_names = []
     path_verified = False
     while path_verified == False:
+        
+        if message == "":
+            message = f"Input path to .{expected_file_type} file or folder containing .{expected_file_type} files: "
 
-        path_input = input(f"Input path to .{expected_file_type} file or folder containing .{expected_file_type} files: ")
+        path_input = input(message)
 
         if not(os.path.exists(path_input)):
             print("Please select a valid file path")
