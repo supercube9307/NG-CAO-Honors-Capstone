@@ -1,7 +1,7 @@
 from astropy.io import fits
 import numpy as np
 import os
-from fits_file_handling.directory_input import get_directory_input
+from directory_input import get_directory_input
         
 def average_fits(file_names, path_input):
     
@@ -9,7 +9,7 @@ def average_fits(file_names, path_input):
     for file in file_names:
     
         print("Converting " + file)
-        file_path =  path_input+"\\"+file
+        file_path =  path_input+"/"+file
 
         with fits.open(file_path) as hdul:
             x_length = int(hdul[1].header["NAXIS1"])
@@ -36,6 +36,6 @@ if __name__ == '__main__':
     hdul_ouptut = fits.HDUList([prim,hdu])
     
     average_filepath = path_input+"\\Average_Output.fits"
-    hdu.writeto(average_filepath, overwrite=True)
+    hdul_ouptut.writeto(average_filepath, overwrite=True)
 
     print("Wrote to file "+average_filepath)

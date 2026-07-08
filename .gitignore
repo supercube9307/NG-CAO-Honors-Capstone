@@ -1,5 +1,6 @@
 /.venv/*
 /Shared_Files/Bad_Pixel_Calibration_Frames
+/Shared_Files/dot_grids
 /output.csv
 /C_gain_array.csv
 /C_offset_array.csv
