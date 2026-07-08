@@ -7,7 +7,7 @@ Python equivalent of Copy_of_LoadInImage.m
 
 Loads a stack of FITS calibration frames, takes the first frame, splits it
 into a 12x12 grid of 162x216 blocks, applies a white top-hat morphological
-filter to each block (using a square structuring element whose size varies
+filter to each block (using a footprint_rectangle structuring element whose size varies
 by block, mirroring the MATLAB switch/case logic), and reassembles + displays
 the filtered image.
 
@@ -18,17 +18,20 @@ Requires: numpy, astropy, scikit-image, matplotlib
 import glob
 import os
 
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 from skimage.morphology import white_tophat
-from skimage.morphology.footprints import square
+from skimage.morphology.footprints import footprint_rectangle
+from fits_file_handling.directory_input import get_directory_input
 
 # ----------------------------------------------------------------------
 # Config
 # ----------------------------------------------------------------------
-IMGS_FOLDER = "../Bad_Pixel_Calibration_Frames/averaged/"
-FILE_TYPE = "*.fits"
+IMGS_FOLDER = "Shared_Files/Bad_Pixel_Calibration_Frames/averaged"
+FILE_TYPE = ".fits"
 FITS_EXTNAME = "Image"  # extension name used by fitsread(fpath(x), "Image")
 
 IMG_HEIGHT = 1944
@@ -79,12 +82,6 @@ _register([49, 61, 73, 85], 11)
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
-def img_folder_read(folder, file_type):
-    """Equivalent of ImgFolderRead: list matching image files, sorted."""
-    files = sorted(glob.glob(os.path.join(folder, file_type)))
-    return files, len(files)
-
-
 def get_block(image, row_idx, col_idx):
     """Extract block (row_idx, col_idx) using 1-based MATLAB-style indexing."""
     r0 = (row_idx - 1) * BLOCK_H
@@ -104,7 +101,15 @@ def set_block(dest, row_idx, col_idx, block):
 # ----------------------------------------------------------------------
 def main():
     # ---- Load in the images ----
-    img_fnames, n_imgs = img_folder_read(IMGS_FOLDER, FILE_TYPE)
+    
+    file_names, path = get_directory_input()
+
+    img_fnames = []
+    for file in file_names:
+        img_fnames.append(os.path.join(path, file))
+    
+    n_imgs = len(file_names)
+
     if n_imgs == 0:
         raise FileNotFoundError(
             f"No files matching {FILE_TYPE} found in {IMGS_FOLDER}"
@@ -113,7 +118,7 @@ def main():
     datas = np.zeros((IMG_HEIGHT, IMG_WIDTH, n_imgs))
     for i, fname in enumerate(img_fnames):
         with fits.open(fname) as hdul:
-            datas[:, :, i] = hdul[FITS_EXTNAME].data
+            datas[:, :, i] = hdul[1].data
 
     image = datas[:, :, 0]
 
@@ -132,7 +137,7 @@ def main():
     for x in range(1, N_BLOCKS + 1):
         size = STREL_SIZE_FOR_BLOCK.get(x)
         if size is not None:
-            blocks[:, :, x - 1] = white_tophat(blocks[:, :, x - 1], square(size))
+            blocks[:, :, x - 1] = white_tophat(blocks[:, :, x - 1], footprint_rectangle([size, size]))
 
     # ---- Reassemble filtered blocks into the full image ----
     image2 = np.zeros((IMG_HEIGHT, IMG_WIDTH))
