@@ -1,7 +1,7 @@
 %function Copy_of_LoadInImage()
 clc; clear; close all;
 
-ImgsFolder = '../Bad_Pixel_Calibration_Frames/averaged/';
+ImgsFolder = '/home/super/Documents/NG-CAO-Honors-Capstone/local_data/Bad_Pixel_Calibration_Frames/averaged';
 
 % load in the images
 FileType = '*.fits';
@@ -19,7 +19,7 @@ for x=1:nImgs
     datas(:, :, x) = fitsread(fpath(x), "Image");
 end
 
-image = datas(:, :, 1);
+source_image = datas(:, :, 2);
 
 %   Random Image Selection
 %amount = size(images, 3);
@@ -65,7 +65,7 @@ SNR = SNR / sum(J(518:522, 73:77), "all")
 %}
 
 %   Segmentation Start
-bim = blockedImage(image,BlockSize=[162 216]);
+bim = blockedImage(source_image,BlockSize=[162 216]);
 blocks = zeros([162 216 144]);
 strel3 = strel('square', 3);
 strel4 = strel('square', 4);
@@ -121,11 +121,17 @@ for x=1:12
 end
 
 bim2.Mode = "r";
-image2 = bim2.Source{:};
-figure
-imshow(image2)
-figure
-imshow(image2, [])
+filtered_image = bim2.Source{:};
+f1 = figure;
+imshow(filtered_image)
+title("First Image")
+
+f2 = figure;
+imshow(filtered_image, [])
+title("Second Image")
+
+scaled_image = (255 * filtered_image) / max(filtered_image(:));
+imwrite(cast(scaled_image, 'uint8'), "matlab_output.png");
 
 %   Segmentation End
 

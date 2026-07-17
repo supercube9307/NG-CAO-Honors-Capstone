@@ -15,7 +15,6 @@ Requires: numpy, astropy, scikit-image, matplotlib
     pip install numpy astropy scikit-image matplotlib
 """
 
-import glob
 import os
 
 import matplotlib
@@ -25,7 +24,8 @@ import numpy as np
 from astropy.io import fits
 from skimage.morphology import white_tophat
 from skimage.morphology.footprints import footprint_rectangle
-from fits_file_handling.directory_input import get_directory_input
+from Shared_Files.fits_file_handling.directory_input import get_directory_input
+from PIL import Image
 
 # ----------------------------------------------------------------------
 # Config
@@ -110,17 +110,12 @@ def main():
     
     n_imgs = len(file_names)
 
-    if n_imgs == 0:
-        raise FileNotFoundError(
-            f"No files matching {FILE_TYPE} found in {IMGS_FOLDER}"
-        )
-
     datas = np.zeros((IMG_HEIGHT, IMG_WIDTH, n_imgs))
     for i, fname in enumerate(img_fnames):
         with fits.open(fname) as hdul:
             datas[:, :, i] = hdul[1].data
 
-    image = datas[:, :, 0]
+    source_image = datas[:, :, 0]
 
     # ---- Segmentation start: split into 12x12 grid of blocks ----
     blocks = np.zeros((BLOCK_H, BLOCK_W, N_BLOCKS))
@@ -129,7 +124,7 @@ def main():
     block_positions = []  # (row_idx, col_idx) for each z, in fill order
     for x in range(1, N_BLOCK_ROWS + 1):
         for y in range(1, N_BLOCK_COLS + 1):
-            blocks[:, :, z] = get_block(image, x, y)
+            blocks[:, :, z] = get_block(source_image, x, y)
             block_positions.append((x, y))
             z += 1
 
@@ -140,25 +135,28 @@ def main():
             blocks[:, :, x - 1] = white_tophat(blocks[:, :, x - 1], footprint_rectangle([size, size]))
 
     # ---- Reassemble filtered blocks into the full image ----
-    image2 = np.zeros((IMG_HEIGHT, IMG_WIDTH))
+    filtered_image = np.zeros((IMG_HEIGHT, IMG_WIDTH))
     for z, (x, y) in enumerate(block_positions):
-        set_block(image2, x, y, blocks[:, :, z])
+        set_block(filtered_image, x, y, blocks[:, :, z])
 
     # ---- Display ----
-    plt.figure()
-    plt.imshow(image2, cmap="gray")
-    plt.title("Filtered Image")
-    plt.axis("off")
+    if __name__ == "__main__":  
+        # plt.figure()
+        # plt.imshow(filtered_image, cmap="gray")
+        # plt.colorbar()
+        # plt.title("Filtered Image")
+        # plt.axis("off")
 
-    plt.figure()
-    plt.imshow(image2, cmap="gray", vmin=np.min(image2), vmax=np.max(image2))
-    plt.colorbar()
-    plt.title("Filtered Image (auto-scaled)")
-    plt.axis("off")
+        plt.figure(figsize=(IMG_HEIGHT, IMG_WIDTH,'px'))
+        plt.imshow(filtered_image, cmap="gray", vmin=np.min(filtered_image), vmax=np.max(filtered_image))
+        plt.axis("off")
+        plt.savefig("local_data/morph_filter_frames/python_morph_filter.png",bbox_inches='tight',)
+        plt.colorbar()
+        plt.title("Filtered Image (auto-scaled)")
 
-    plt.show()
+        plt.show()
 
-    return image2
+    return filtered_image
 
 
 if __name__ == "__main__":

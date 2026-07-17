@@ -34,18 +34,17 @@ def compile_image_x_y(x_value):
     
 def compute_calibration(images):
 
-    y_min = None
-    y_max = None
     for image in images:
 
-        if y_min == None:
+        try:
+            y_min = min(y_min,image.y_avg)
+        except NameError:
             y_min = image.y_avg
 
-        if y_max == None:
+        try:
+            y_max = max(y_max,image.y_avg)
+        except NameError:
             y_max = image.y_avg
-
-        y_min = min(y_min,image.y_avg)
-        y_max = max(y_max,image.y_avg)
 
     for image in images:
 

@@ -3,9 +3,6 @@ import numpy as np
 import os
 from directory_input import get_directory_input
 
-def raw_to_fits(filename):
-    print("hi")
-
 
 if __name__ == '__main__':
 
@@ -16,7 +13,7 @@ if __name__ == '__main__':
         print("Converting " + filename)
 
         if os.path.isdir(path_input):
-            filename = path_input+"/"+filename
+            filename = os.path.join(path_input, filename)
 
         raw_imarray = np.fromfile(filename, dtype='uint16')
         reshaped_raw_imarray = np.reshape(raw_imarray, (1944,2592))

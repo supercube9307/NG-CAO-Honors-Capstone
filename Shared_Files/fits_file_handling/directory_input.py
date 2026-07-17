@@ -12,6 +12,9 @@ def output_csv_file(output_list, file_name="output.csv"):
         print("Please input a valid response")
             
     if file_output_required == "y":
+
+        file_name = os.path.join("local_data",file_name)
+
         with open(file_name, "w") as output_file:
 
             output_text = ""
@@ -25,7 +28,7 @@ def output_csv_file(output_list, file_name="output.csv"):
 
         print(f"File '{file_name}' created in " + os.getcwd())
 
-def get_directory_input(expected_file_type="fits",message=""):
+def get_directory_input(expected_file_type="fits",message="") -> tuple:
 
     if expected_file_type[0] == ".":
         expected_file_type = expected_file_type.lstrip(".")
@@ -40,14 +43,16 @@ def get_directory_input(expected_file_type="fits",message=""):
         path_input = input(message)
 
         if not(os.path.exists(path_input)):
-            print("Please select a valid file path")
+            error_path = os.path.join(os.getcwd(),path_input)
+            print("Cannot Find: " + error_path)
             continue
         
         if os.path.isfile(path_input):
             print("Parsing File")
             path_input, file = path_input.rsplit("/",1)
             file_names.append(file)
-            return(file_names, path_input)
+            path_verified = True
+            continue
 
 
 
@@ -68,5 +73,7 @@ def get_directory_input(expected_file_type="fits",message=""):
         if len(file_names) == 0:
             print(f"Please select a file or folder with .{expected_file_type} files")
             continue
+
+        path_verified = True
         
-        return(file_names, path_input)
+    return(file_names, path_input)
