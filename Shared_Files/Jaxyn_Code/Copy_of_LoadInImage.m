@@ -1,7 +1,7 @@
 %function Copy_of_LoadInImage()
 clc; clear; close all;
 
-ImgsFolder = '/home/super/Documents/NG-CAO-Honors-Capstone/local_data/Bad_Pixel_Calibration_Frames/averaged';
+ImgsFolder = '/home/super/Documents/NG-CAO-Honors-Capstone/local_data/morph_filter_frames';
 
 % load in the images
 FileType = '*.fits';
@@ -19,7 +19,7 @@ for x=1:nImgs
     datas(:, :, x) = fitsread(fpath(x), "Image");
 end
 
-source_image = datas(:, :, 2);
+source_image = datas(:, :, 1);
 
 %   Random Image Selection
 %amount = size(images, 3);

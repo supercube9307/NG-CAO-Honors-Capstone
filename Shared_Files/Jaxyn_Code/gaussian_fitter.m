@@ -2,9 +2,10 @@ clear; close all; clc
 global frame_to_fit xp yp deltax deltay ifit iter;
 
 % frame = open('J.mat'); 
-frame = open('image.mat');
-square_length = 26;
-subframe = double(frame.image(384-round(square_length/2):384+round(square_length/2),1252-round(square_length/2):1252+round(square_length/2)));
+frame = open('../dot_grid.mat');
+square_length = 10;
+half = round(square_length/2);
+subframe = double(frame.fits(930-half:930+half,810-half:810+half));
 % subframe = frame.J(1025-round(square_length/2):1025+round(square_length/2),2185-round(square_length/2):2185+round(square_length/2));
 frame_to_fit = subframe; % col 27 of subframe for PSF
 initialPars = [300, 15000,0,square_length/2,square_length/2,1,1];
@@ -59,7 +60,7 @@ imagesc(subframe3);colorbar;
 
 
 % normalized power spectral density of PSF 
-PSF_col = subframe(:,14);   % column 27 of subframe for this particular PSF
+PSF_col = subframe(:,half+1);   % column 27 of subframe for this particular PSF
 s = size(PSF_col);    
 % Length of signal (minus 1 if necessary to make the number even)
 L = s(1) -1; 
