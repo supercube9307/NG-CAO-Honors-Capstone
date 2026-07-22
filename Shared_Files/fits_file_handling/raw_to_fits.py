@@ -1,8 +1,8 @@
 from astropy.io import fits
 import numpy as np
 import os
-from fits_file_handling.file_io import *
-from Shared_Files.fits_file_handling.file_io import get_directory_input
+from Shared_Files.helper_functions.file_io import *
+from Shared_Files.helper_functions.file_io import get_directory_input
 
 
 if __name__ == '__main__':

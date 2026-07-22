@@ -24,71 +24,17 @@ Notes on the conversion
 """
 
 import numpy as np
-from scipy.io import loadmat
 from scipy.optimize import least_squares
 import matplotlib.pyplot as plt
-from astropy.io import fits
 import os
 
-import fits_file_handling.file_io as file_io
-from rotated_gaussian import *
+import helper_functions.file_io as file_io
+from helper_functions.rotated_gaussian import *
 
 
 def matlab_range_to_slice(a, b):
     """Convert an inclusive 1-based MATLAB range a:b to a Python slice."""
     return slice(a - 1, b)
-
-def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) -> tuple:
-
-    # frame = loadmat('J.mat')
-    # frame = loadmat('Shared_Files/dot_grid.mat')
-    # image = frame['fits']
-    half = round(square_length / 2) 
-
-    row_slice = matlab_range_to_slice(psf_x - half, psf_x + half)
-    col_slice = matlab_range_to_slice(psf_y - half, psf_y + half)
-
-    subframe = image[row_slice, col_slice].astype(float)
-    # subframe = frame['J'][matlab_range_to_slice(1025-half,1025+half),
-    #                       matlab_range_to_slice(2185-half,2185+half)]
-
-    frame_to_fit = subframe  # col 27 (index 26) of subframe holds the PSF
-
-    initial_pars = np.array([300, 15000, 0, square_length / 2, square_length / 2, 1, 1], dtype=float)
-
-    xp, yp = np.meshgrid(np.arange(1, square_length + 2), np.arange(1, square_length + 2))
-
-    ifit = 1
-
-    result = least_squares(
-        rotated_gaussian_residuals,
-        initial_pars,
-        args=(xp, yp, frame_to_fit),
-        kwargs={'ifit': ifit, 'verbose': True},
-        method='lm',
-        ftol=1e-7,
-        xtol=1e-7,
-    )
-    par_frame_fit = result.x
-
-    _, fitted_gaussian = rotated_gaussian(par_frame_fit, xp, yp, frame_to_fit, ifit=ifit, verbose=False)
-    print(par_frame_fit)
-
-    return(subframe, fitted_gaussian, par_frame_fit, xp, yp)
-
-def par_frame_fit_as_dict(par_frame_fit):
-
-    offset = par_frame_fit[0]
-    amplitude = par_frame_fit[1]
-    theta = par_frame_fit[2]
-    x0 = par_frame_fit[3]
-    y0 = par_frame_fit[4]
-    sigmax = par_frame_fit[5]
-    sigmay = par_frame_fit[6]
-
-    output = {'offset': offset, 'amplitude': amplitude, 'theta': theta, 'x0': x0, 'y0': y0, 'sigmax': sigmax, 'sigmay': sigmay}
-
-    return(output)
 
 def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp, yp):
 
@@ -140,8 +86,10 @@ def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp
     plt.colorbar()
 
     # normalized power spectral density of PSF
-    PSF_col = subframe[:, round(square_length/2)]  # column 14 (1-based) of subframe for this particular PSF
-    L = PSF_col.shape[0] - 1  # length of signal (minus 1 to make it even, if needed)
+    psf_idx = np.argmax(subframe)
+    psf_y, psf_x = np.unravel_index(psf_idx, subframe.shape)
+    PSF_col = subframe[:, psf_x]  # column 14 (1-based) of subframe for this particular PSF
+    L = PSF_col.shape[0]   # length of signal (minus 1 to make it even, if needed)
     Fs = 1  # sampling frequency: 1 per pixel is all we have
     f = Fs / L * np.arange(0, L / 2 + 1)  # frequency domain, positive range only
 
@@ -156,10 +104,51 @@ def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp
 
     plt.show()
 
+def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) -> tuple:
+
+    # frame = loadmat('J.mat')
+    # frame = loadmat('Shared_Files/dot_grid.mat')
+    # image = frame['fits']
+    half = square_length // 2
+
+    # row_slice = matlab_range_to_slice(psf_x - half, psf_x + half)
+    # col_slice = matlab_range_to_slice(psf_y - half, psf_y + half)
+    row_slice = slice(psf_y - half, psf_y + half)
+    col_slice = slice(psf_x - half, psf_x + half)
+
+    subframe = image[row_slice, col_slice].astype(float)
+    # subframe = frame['J'][matlab_range_to_slice(1025-half,1025+half),
+    #                       matlab_range_to_slice(2185-half,2185+half)]
+
+    frame_to_fit = subframe  # col 27 (index 26) of subframe holds the PSF
+
+    initial_pars = np.array([300, 15000, 0, half, half, 1, 1], dtype=float)
+
+    xp, yp = np.meshgrid(np.arange(0, square_length), np.arange(0, square_length))
+
+    ifit = 1
+
+    result = least_squares(
+        rotated_gaussian_residuals,
+        initial_pars,
+        args=(xp, yp, frame_to_fit),
+        kwargs={'ifit': ifit, 'verbose': True},
+        method='lm',
+        ftol=1e-7,
+        xtol=1e-7,
+    )
+    par_frame_fit = result.x
+    par_frame_fit[2] = np.mod(par_frame_fit[3], 2*np.pi)
+
+    _, fitted_gaussian = rotated_gaussian(par_frame_fit, xp, yp, frame_to_fit, ifit=ifit, verbose=False)
+    print(par_frame_fit)
+
+    return(subframe, fitted_gaussian, par_frame_fit, xp, yp)
+
 def main():
 
-    psf_x = 930
-    psf_y = 810
+    psf_x = 720
+    psf_y = 1119
 
     file_names, path = file_io.get_directory_input()    
 
@@ -170,8 +159,6 @@ def main():
     square_length = 10
 
     results = fit_gaussian(image, square_length, psf_x, psf_y)
-
-    par_frame_fit = results[2]
 
     show_results(*results)
 

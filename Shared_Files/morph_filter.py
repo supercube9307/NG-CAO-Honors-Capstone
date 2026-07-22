@@ -24,7 +24,7 @@ import numpy as np
 from astropy.io import fits
 from skimage.morphology import white_tophat
 from skimage.morphology.footprints import footprint_rectangle
-from fits_file_handling.file_io import get_directory_input
+from helper_functions.file_io import *
 
 # ----------------------------------------------------------------------
 # Config
@@ -81,44 +81,44 @@ _register([49, 61, 73, 85], 11)
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
-def get_block(image, row_idx, col_idx):
+def get_block(image, row_idx, col_idx, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W):
     """Extract block (row_idx, col_idx) using 1-based MATLAB-style indexing."""
-    r0 = (row_idx - 1) * BLOCK_H
-    c0 = (col_idx - 1) * BLOCK_W
+    r0 = (row_idx) * BLOCK_H
+    c0 = (col_idx) * BLOCK_W
     return image[r0:r0 + BLOCK_H, c0:c0 + BLOCK_W]
 
 
-def set_block(dest, row_idx, col_idx, block):
+def set_block(dest, row_idx, col_idx, block, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W):
     """Write block (row_idx, col_idx) into dest using 1-based indexing."""
-    r0 = (row_idx - 1) * BLOCK_H
-    c0 = (col_idx - 1) * BLOCK_W
+    r0 = (row_idx) * BLOCK_H
+    c0 = (col_idx) * BLOCK_W
     dest[r0:r0 + BLOCK_H, c0:c0 + BLOCK_W] = block
 
 def morph_filter_image(source_image) -> np.ndarray:
 
-        # ---- Segmentation start: split into 12x12 grid of blocks ----
-        blocks = np.zeros((BLOCK_H, BLOCK_W, N_BLOCKS))
+    # ---- Segmentation start: split into 12x12 grid of blocks ----
+    blocks = np.zeros((BLOCK_H, BLOCK_W, N_BLOCKS))
 
-        z = 0
-        block_positions = []  # (row_idx, col_idx) for each z, in fill order
-        for x in range(1, N_BLOCK_ROWS + 1):
-            for y in range(1, N_BLOCK_COLS + 1):
-                blocks[:, :, z] = get_block(source_image, x, y)
-                block_positions.append((x, y))
-                z += 1
+    z = 0
+    block_positions = []  # (row_idx, col_idx) for each z, in fill order
+    for x in range(0, N_BLOCK_ROWS):
+        for y in range(0, N_BLOCK_COLS):
+            blocks[:, :, z] = get_block(source_image, x, y)
+            block_positions.append((x, y))
+            z += 1
 
-        # ---- Apply white top-hat filtering with per-block structuring element ----
-        for x in range(1, N_BLOCKS + 1):
-            size = STREL_SIZE_FOR_BLOCK.get(x)
-            if size is not None:
-                blocks[:, :, x - 1] = white_tophat(blocks[:, :, x - 1], footprint_rectangle([size, size]))
+    # ---- Apply white top-hat filtering with per-block structuring element ----
+    for x in range(0, N_BLOCKS):
+        size = STREL_SIZE_FOR_BLOCK.get(x)
+        if size is not None:
+            blocks[:, :, x] = white_tophat(blocks[:, :, x], footprint_rectangle([size, size]))
 
-        # ---- Reassemble filtered blocks into the full image ----
-        filtered_image = np.zeros((IMG_HEIGHT, IMG_WIDTH))
-        for z, (x, y) in enumerate(block_positions):
-            set_block(filtered_image, x, y, blocks[:, :, z])
+    # ---- Reassemble filtered blocks into the full image ----
+    filtered_image = np.zeros((IMG_HEIGHT, IMG_WIDTH))
+    for z, (x, y) in enumerate(block_positions):
+        set_block(filtered_image, x, y, blocks[:, :, z])
 
-        return(filtered_image)
+    return(filtered_image)
 
 # ----------------------------------------------------------------------
 # Main
@@ -128,40 +128,24 @@ def main():
     
     file_names, path = get_directory_input()
 
-    img_fnames = []
-    for file in file_names:
-        img_fnames.append(os.path.join(path, file))
-    
-    n_imgs = len(file_names)
+    for file_name in file_names: 
 
-    datas = np.zeros((IMG_HEIGHT, IMG_WIDTH, n_imgs))
-    for i, fname in enumerate(img_fnames):
-        with fits.open(fname) as hdul:
-            datas[:, :, i] = hdul[1].data # type: ignore
+        file_path = os.path.join(path, file_name)
 
-    filtered_image_list = []
-    for source_image in datas[:, :]: 
+        source_image = read_fits_file(file_path)
 
         filtered_image = morph_filter_image(source_image)
 
         # ---- Display ----
-        if __name__ == "__main__":  
-            # plt.figure()
-            # plt.imshow(filtered_image, cmap="gray")
-            # plt.colorbar()
-            # plt.title("Filtered Image")
-            # plt.axis("off")
 
-            plt.figure(figsize=(IMG_HEIGHT, IMG_WIDTH,'px'))
-            plt.imshow(filtered_image, cmap="gray", vmin=np.min(filtered_image), vmax=np.max(filtered_image))
-            plt.axis("off")
-            # plt.savefig("local_data/morph_filter_frames/python_morph_filter.png",bbox_inches='tight',)
-            plt.colorbar()
-            plt.title("Filtered Image (auto-scaled)")
+        plt.figure(figsize=(IMG_HEIGHT, IMG_WIDTH,'px'))
+        plt.imshow(filtered_image, cmap="gray", vmin=np.min(filtered_image), vmax=np.max(filtered_image))
+        plt.axis("off")
+        # plt.savefig("local_data/morph_filter_frames/python_morph_filter.png",bbox_inches='tight',)
+        plt.colorbar()
+        plt.title("Filtered Image (auto-scaled)")
 
-            plt.show()
-
-    return filtered_image_list
+        plt.show()
 
 
 if __name__ == "__main__":

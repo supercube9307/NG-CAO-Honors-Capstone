@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from astropy.io import fits
-import Shared_Files.fits_file_handling.file_io as di
+import Shared_Files.helper_functions.file_io as di
 
 class image_x_y:
     def __init__(self, x_value, y_array):

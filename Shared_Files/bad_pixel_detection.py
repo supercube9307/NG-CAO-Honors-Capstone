@@ -2,8 +2,8 @@ from astropy.io import fits
 import numpy as np
 import os
 
-import Shared_Files.bp_util.fixedbp as fixedbp
-from Shared_Files.fits_file_handling.file_io import *
+import Shared_Files.helper_functions.bp_util.fixedbp as fixedbp
+from Shared_Files.helper_functions.file_io import *
 
 def analyze_file(file_path, operation_mode):
 

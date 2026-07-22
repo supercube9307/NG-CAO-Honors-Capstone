@@ -1,7 +1,7 @@
 from astropy.io import fits
 import numpy as np
 import os
-from file_io import get_directory_input
+from Shared_Files.helper_functions.file_io import get_directory_input
         
 def average_fits(file_names, path_input):
     
