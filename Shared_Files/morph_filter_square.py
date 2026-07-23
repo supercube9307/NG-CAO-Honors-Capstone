@@ -21,7 +21,6 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.io import fits
 from skimage.morphology import white_tophat
 from skimage.morphology.footprints import footprint_rectangle
 from helper_functions.file_io import *
@@ -29,9 +28,6 @@ from helper_functions.file_io import *
 # ----------------------------------------------------------------------
 # Config
 # ----------------------------------------------------------------------
-IMGS_FOLDER = "Shared_Files/Bad_Pixel_Calibration_Frames/averaged"
-FILE_TYPE = ".fits"
-FITS_EXTNAME = "Image"  # extension name used by fitsread(fpath(x), "Image")
 
 IMG_HEIGHT = 1944
 IMG_WIDTH = 2592

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from astropy.io import fits
-import Shared_Files.helper_functions.file_io as di
+from Shared_Files.helper_functions.file_io import *
 
 class image_x_y:
     def __init__(self, x_value, y_array):
@@ -66,7 +66,7 @@ def compute_calibration(images):
 
 if __name__ == "__main__":
 
-    file_names, path_input = di.get_directory_input(message="Input path to folder containing .fits files: ")
+    file_names, path_input = get_directory_input(message="Input path to folder containing .fits files: ")
 
     images = []
     for file_name in file_names:
@@ -81,8 +81,7 @@ if __name__ == "__main__":
 
     print("Generated Gain Corrections and Offset Corrections")
 
-    output_file_names = ["C_gain_array.csv", "C_offset_array.csv"]
+    output_file_names = ["C_gain_array.fits", "C_offset_array.fits"]
     for x in range(0,2):
-        print("\nFor "+output_file_names[x]+":")
-        di.output_csv_file(output_arrays[x], file_name=output_file_names[x])
+        write_fits_file(output_arrays[x], output_file_names[x])
 

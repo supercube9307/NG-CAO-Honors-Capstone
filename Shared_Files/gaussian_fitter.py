@@ -32,9 +32,6 @@ import helper_functions.file_io as file_io
 from helper_functions.rotated_gaussian import *
 
 
-def matlab_range_to_slice(a, b):
-    """Convert an inclusive 1-based MATLAB range a:b to a Python slice."""
-    return slice(a - 1, b)
 
 def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp, yp):
 
@@ -104,7 +101,7 @@ def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp
 
     plt.show()
 
-def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) -> tuple:
+def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int, verbose=True) -> tuple:
 
     # frame = loadmat('J.mat')
     # frame = loadmat('Shared_Files/dot_grid.mat')
@@ -113,8 +110,12 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) 
 
     # row_slice = matlab_range_to_slice(psf_x - half, psf_x + half)
     # col_slice = matlab_range_to_slice(psf_y - half, psf_y + half)
-    row_slice = slice(psf_y - half, psf_y + half)
-    col_slice = slice(psf_x - half, psf_x + half)
+    if square_length / 2 != half:
+        row_slice = slice(psf_y - half - 1, psf_y + half)
+        col_slice = slice(psf_x - half - 1, psf_x + half)
+    else:        
+        row_slice = slice(psf_y - half, psf_y + half)
+        col_slice = slice(psf_x - half, psf_x + half)
 
     subframe = image[row_slice, col_slice].astype(float)
     # subframe = frame['J'][matlab_range_to_slice(1025-half,1025+half),
@@ -132,7 +133,7 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) 
         rotated_gaussian_residuals,
         initial_pars,
         args=(xp, yp, frame_to_fit),
-        kwargs={'ifit': ifit, 'verbose': True},
+        kwargs={'ifit': ifit, 'verbose': verbose},
         method='lm',
         ftol=1e-7,
         xtol=1e-7,
@@ -141,7 +142,8 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int) 
     par_frame_fit[2] = np.mod(par_frame_fit[3], 2*np.pi)
 
     _, fitted_gaussian = rotated_gaussian(par_frame_fit, xp, yp, frame_to_fit, ifit=ifit, verbose=False)
-    print(par_frame_fit)
+    if verbose:
+        print(par_frame_fit)
 
     return(subframe, fitted_gaussian, par_frame_fit, xp, yp)
 
