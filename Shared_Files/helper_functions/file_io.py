@@ -46,7 +46,6 @@ def read_fits_file(file_path: str) -> np.ndarray:
 
     with fits.open(file_path) as hdul:
         image = hdul[1].data #type: ignore
-        image = np.rot90(image, k=2)
 
     return(image)
 

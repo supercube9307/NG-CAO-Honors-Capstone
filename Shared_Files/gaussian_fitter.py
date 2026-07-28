@@ -139,9 +139,10 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int, 
         xtol=1e-7,
     )
     par_frame_fit = result.x
-    par_frame_fit[2] = np.mod(par_frame_fit[3], 2*np.pi)
+    par_frame_fit[2] = np.mod(par_frame_fit[2], 2*np.pi)
 
-    _, fitted_gaussian = rotated_gaussian(par_frame_fit, xp, yp, frame_to_fit, ifit=ifit, verbose=False)
+    _, fitted_gaussian = rotated_gaussian(par_frame_fit, xp, yp, frame_to_fit, ifit=ifit, verbose=verbose)
+
     if verbose:
         print(par_frame_fit)
 
@@ -160,7 +161,7 @@ def main():
 
     square_length = 10
 
-    results = fit_gaussian(image, square_length, psf_x, psf_y)
+    results = fit_gaussian(image, square_length, psf_x, psf_y, verbose=False)
 
     show_results(*results)
 

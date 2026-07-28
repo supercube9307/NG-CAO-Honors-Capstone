@@ -90,7 +90,7 @@ def set_block(dest, row_idx, col_idx, block, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_
     c0 = (col_idx) * BLOCK_W
     dest[r0:r0 + BLOCK_H, c0:c0 + BLOCK_W] = block
 
-def morph_filter_image(source_image) -> np.ndarray:
+def morph_filter_image_square(source_image) -> np.ndarray:
 
     # ---- Segmentation start: split into 12x12 grid of blocks ----
     blocks = np.zeros((BLOCK_H, BLOCK_W, N_BLOCKS))
@@ -130,7 +130,7 @@ def main():
 
         source_image = read_fits_file(file_path)
 
-        filtered_image = morph_filter_image(source_image)
+        filtered_image = morph_filter_image_square(source_image)
 
         # ---- Display ----
 

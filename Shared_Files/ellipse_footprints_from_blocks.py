@@ -1,8 +1,9 @@
+import matplotlib.pyplot as plt
+import json
+
 from helper_functions.file_io import *
 from morph_filter_square import get_block 
 from gaussian_fitter import fit_gaussian
-import matplotlib.pyplot as plt
-import json
 
 def parameters_as_dict(par):
 
@@ -19,35 +20,36 @@ def parameters_as_dict(par):
 
 def show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, verbose = False):
         
-    if verbose == True:
+    if verbose == False:
+        return()
+    
+    new_frame = np.zeros(subframe.shape)
+    new_frame_padded = new_frame.copy() + 5
+    new_frame_padded = np.pad(new_frame_padded, half)
+    new_frame_padded -= 5
 
-        new_frame = np.zeros(subframe.shape)
-        new_frame_padded = new_frame.copy() + 5
-        new_frame_padded = np.pad(new_frame_padded, half)
-        new_frame_padded -= 5
+    psf_y_padded = psf_y + half
+    psf_x_padded = psf_x + half
 
-        psf_y_padded = psf_y + half
-        psf_x_padded = psf_x + half
+    new_frame_padded[psf_y_padded-half:psf_y_padded+half, psf_x_padded-half:psf_x_padded+half] = fitted_gaussian
+    new_frame = new_frame_padded[half:subframe.shape[0]+half,half:subframe.shape[1]+half]
 
-        new_frame_padded[psf_y_padded-half:psf_y_padded+half, psf_x_padded-half:psf_x_padded+half] = fitted_gaussian
-        new_frame = new_frame_padded[half:subframe.shape[0]+half,half:subframe.shape[1]+half]
+    plt.figure()
+    plt.imshow(subframe)
+    plt.title(f"Subframe {block_idx}")
+    plt.colorbar()
 
-        plt.figure()
-        plt.imshow(subframe)
-        plt.title(f"Subframe {block_idx}")
-        plt.colorbar()
+    plt.figure()
+    plt.imshow(new_frame)
+    plt.title(f"New Frame {block_idx}")
+    plt.colorbar()
 
-        plt.figure()
-        plt.imshow(new_frame)
-        plt.title(f"New Frame {block_idx}")
-        plt.colorbar()
+    plt.figure()
+    plt.imshow(subframe - new_frame)
+    plt.title(f"subframe - new_frame {block_idx}")
+    plt.colorbar()
 
-        plt.figure()
-        plt.imshow(subframe - new_frame)
-        plt.title(f"subframe - new_frame {block_idx}")
-        plt.colorbar()
-
-        plt.show()
+    plt.show()
 
 def generate_strel_parameters(image, n_rows = 12, n_cols = 12) -> dict:
 
@@ -87,7 +89,7 @@ def generate_strel_parameters(image, n_rows = 12, n_cols = 12) -> dict:
 
             pars_list.append(par_dict)
 
-    output_dict = {'square_length':square_length, 'pars_list':pars_list, 'n_rows':n_rows, 'n_cols':n_cols}
+    output_dict = {'n_rows':n_rows, 'n_cols':n_cols, 'pars_list':pars_list}
 
     return(output_dict)
 
@@ -95,9 +97,9 @@ def main():
 
     file_names, path = get_directory_input()
 
-    file_name = file_names[0]
+    file_path = os.path.join(path, file_names[0])
 
-    image = read_fits_file(os.path.join(path, file_name))
+    image = read_fits_file(file_path)
 
     output_dict = generate_strel_parameters(image)
 

@@ -22,7 +22,7 @@ import numpy as np
 _iter_counter = itertools.count(1)
 
 
-def rotated_gaussian(par, xp, yp, frame_to_fit, ifit=1, verbose=True):
+def rotated_gaussian(par, xp, yp, frame_to_fit, ifit=1, verbose=False):
     """
     Evaluate the rotated-2D-Gaussian model and its residual against
     frame_to_fit, exactly mirroring the MATLAB function of the same name.
