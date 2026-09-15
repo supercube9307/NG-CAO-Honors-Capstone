@@ -26,80 +26,81 @@ Notes on the conversion
 import numpy as np
 from scipy.optimize import least_squares
 import matplotlib.pyplot as plt
-import os
 
-import helper_functions.file_io as file_io
-from helper_functions.rotated_gaussian import *
+from im_filtering.helper_functions.rotated_gaussian import *
 
 
 
-def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp, yp):
+def show_results(subframe: np.ndarray, fitted_gaussian, par_frame_fit: tuple, xp, yp, show_spectral_density=False):
 
     plt.figure()
     plt.imshow(subframe)
+    plt.title(f"PSF")
     plt.colorbar()
 
-    plt.figure()
-    # look at residual
-    plt.imshow(subframe - fitted_gaussian)
-    plt.colorbar()
-
-    square_length = subframe.shape[0]
-    x0 = par_frame_fit[3]  # ellipse centre coordinates
-    y0 = par_frame_fit[4]
-    sigmax = abs(par_frame_fit[5]) # horizontal radius
-    sigmay = abs(par_frame_fit[6]) # vertical radius
-
-    # rotate the ellipse according to the fitted orientation angle
-    theta = par_frame_fit[2]
-    X = np.cos(theta) * (xp - x0) - np.sin(theta) * (yp - y0)
-    Y = np.sin(theta) * (xp - x0) + np.cos(theta) * (yp - y0)
-
-    # get the pixels that fall closest to the ellipses (shade in the regions)
-    ellipse_pixels1 = (X ** 2 / sigmax ** 2 + Y ** 2 / sigmay ** 2 <= 1)
-    ellipse_pixels2 = (X ** 2 / (2 * sigmax) ** 2 + Y ** 2 / (2 * sigmay) ** 2 <= 1)
-    ellipse_pixels3 = (X ** 2 / (3 * sigmax) ** 2 + Y ** 2 / (3 * sigmay) ** 2 <= 1)
 
     plt.figure()
     plt.imshow(fitted_gaussian)
+    plt.title("Fitted Gaussian")
     plt.colorbar()
-
-    plt.figure()
-    subframe1 = subframe.copy()
-    subframe1[ellipse_pixels1] = np.inf  # color the ellipses to show up on figure
-    plt.imshow(subframe1)
-    plt.colorbar()
-
-    plt.figure()
-    subframe2 = subframe.copy()
-    subframe2[ellipse_pixels2] = np.inf
-    plt.imshow(subframe2)
-    plt.colorbar()
-
-    plt.figure()
-    subframe3 = subframe.copy()
-    subframe3[ellipse_pixels3] = np.inf
-    plt.imshow(subframe3)
-    plt.colorbar()
+    
+    # # look at residual
+    # plt.figure()
+    # plt.imshow(subframe - fitted_gaussian)
+    # plt.title("Residual")
+    # plt.colorbar()
 
     # normalized power spectral density of PSF
-    psf_idx = np.argmax(subframe)
-    psf_y, psf_x = np.unravel_index(psf_idx, subframe.shape)
-    PSF_col = subframe[:, psf_x]  # column 14 (1-based) of subframe for this particular PSF
-    L = PSF_col.shape[0]   # length of signal (minus 1 to make it even, if needed)
-    Fs = 1  # sampling frequency: 1 per pixel is all we have
-    f = Fs / L * np.arange(0, L / 2 + 1)  # frequency domain, positive range only
+    if show_spectral_density:
+        psf_idx = np.argmax(subframe)
+        _, psf_x = np.unravel_index(psf_idx, subframe.shape)
+        PSF_col = subframe[:, psf_x]  # column 14 (1-based) of subframe for this particular PSF
+        L = PSF_col.shape[0]   # length of signal (minus 1 to make it even, if needed)
+        Fs = 1  # sampling frequency: 1 per pixel is all we have
+        f = Fs / L * np.arange(0, L / 2 + 1)  # frequency domain, positive range only
 
-    Y_fft = np.abs(np.fft.fft(PSF_col))
-    # divide by length of signal (fft scaling), multiply by 2 (amplitude split
-    # across +/- frequencies), then square for power spectral amplitude
-    Y_fft = (2 * Y_fft / L) ** 2
-    Ypos = Y_fft[:int(np.floor(L / 2)) + 1]
+        Y_fft = np.abs(np.fft.fft(PSF_col))
+        # divide by length of signal (fft scaling), multiply by 2 (amplitude split
+        # across +/- frequencies), then square for power spectral amplitude
+        Y_fft = (2 * Y_fft / L) ** 2
+        Ypos = Y_fft[:int(np.floor(L / 2)) + 1]
 
-    plt.figure()
-    plt.semilogy(f, Ypos / np.sum(np.abs(Ypos)))
+        plt.figure()
+        plt.semilogy(f, Ypos / np.sum(np.abs(Ypos)))
 
-    plt.show()
+    # square_length = subframe.shape[0]
+    # x0 = par_frame_fit[3]  # ellipse centre coordinates
+    # y0 = par_frame_fit[4]
+    # sigmax = abs(par_frame_fit[5]) # horizontal radius
+    # sigmay = abs(par_frame_fit[6]) # vertical radius
+
+    # # rotate the ellipse according to the fitted orientation angle
+    # theta = par_frame_fit[2]
+    # X = np.cos(theta) * (xp - x0) - np.sin(theta) * (yp - y0)
+    # Y = np.sin(theta) * (xp - x0) + np.cos(theta) * (yp - y0)
+
+    # # get the pixels that fall closest to the ellipses (shade in the regions)
+    # ellipse_pixels1 = (X ** 2 / sigmax ** 2 + Y ** 2 / sigmay ** 2 <= 1)
+    # ellipse_pixels2 = (X ** 2 / (2 * sigmax) ** 2 + Y ** 2 / (2 * sigmay) ** 2 <= 1)
+    # ellipse_pixels3 = (X ** 2 / (3 * sigmax) ** 2 + Y ** 2 / (3 * sigmay) ** 2 <= 1)
+
+    # plt.figure()
+    # subframe1 = subframe.copy()
+    # subframe1[ellipse_pixels1] = np.inf  # color the ellipses to show up on figure
+    # plt.imshow(subframe1)
+    # plt.colorbar()
+
+    # plt.figure()
+    # subframe2 = subframe.copy()
+    # subframe2[ellipse_pixels2] = np.inf
+    # plt.imshow(subframe2)
+    # plt.colorbar()
+
+    # plt.figure()
+    # subframe3 = subframe.copy()
+    # subframe3[ellipse_pixels3] = np.inf
+    # plt.imshow(subframe3)
+    # plt.colorbar()
 
 def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int, verbose=True) -> tuple:
 
@@ -147,23 +148,3 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int, 
         print(par_frame_fit)
 
     return(subframe, fitted_gaussian, par_frame_fit, xp, yp)
-
-def main():
-
-    psf_x = 720
-    psf_y = 1119
-
-    file_names, path = file_io.get_directory_input()    
-
-    file_path = os.path.join(path, file_names[0])
-
-    image = file_io.read_fits_file(file_path)
-
-    square_length = 10
-
-    results = fit_gaussian(image, square_length, psf_x, psf_y, verbose=False)
-
-    show_results(*results)
-
-if __name__ == '__main__':
-    main()

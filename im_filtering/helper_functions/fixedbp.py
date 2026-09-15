@@ -7,7 +7,7 @@ Utility to create a bad pixel map from a dark frame and/or a flat frame.
 """
 
 import numpy as np
-import Shared_Files.helper_functions.bp_util.check as check
+import im_filtering.helper_functions.check as check
 
 
 def compute_fixedbp_excam(dark, flat, dthresh, ffrac, fwidth):

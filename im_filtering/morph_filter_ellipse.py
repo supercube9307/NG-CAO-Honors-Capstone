@@ -3,9 +3,10 @@ from skimage.morphology import white_tophat
 import matplotlib.pyplot as plt
 import json
 
-from helper_functions.file_io import *
-from morph_filter_square import get_block
-from morph_filter_square import set_block
+from im_filtering.helper_functions.file_io import *
+from im_filtering.morph_filter_calibration import main as morph_cal
+from im_filtering.morph_filter_square import get_block
+from im_filtering.morph_filter_square import set_block
 
 def ellipse_from_parameters(par, show_ellipse=False, n_sigma = 2) -> np.ndarray:
 
@@ -34,9 +35,6 @@ def ellipse_from_parameters(par, show_ellipse=False, n_sigma = 2) -> np.ndarray:
         plt.imshow(strel_theta)
         plt.colorbar()
 
-    # if strel_theta.size > 10000:
-    #     strel_theta = np.zeros([5,5])
-
     return(strel_theta)
 
 def get_pars_list(strel_file_path = 'local_data/morph_filter/strel_parameters.json') -> tuple:
@@ -54,12 +52,16 @@ def get_pars_list(strel_file_path = 'local_data/morph_filter/strel_parameters.js
             n_cols = output_dict['n_cols']
 
     except FileNotFoundError:
+        print("Calibration data not found in " + os.getcwd() + ". Regenerating " + strel_file_path)
+        morph_cal()
 
-        message = f"""
-{os.path.join(os.getcwd(), strel_file_path)} was not found.
-Please run 'ellipse_footprints_from_blocks.py' to generate list of morphological filter footprints."""
+        with open(strel_file_path) as strel_file:
+            output_dict = json.load(strel_file)
+
+            pars_list = output_dict['pars_list']
+            n_rows = output_dict['n_rows']
+            n_cols = output_dict['n_cols']
         
-        print(message)
 
     return(pars_list, n_rows, n_cols)
 
@@ -98,7 +100,7 @@ def write_morph_filter_output(image, file_path: str):
 
         write_fits_file(image, file_path_filtered)
 
-def morph_filter_image_ellipse(image,show_blocks=False, show_ellipse=False) -> np.ndarray:
+def morph_filter_image_ellipse(image: np.ndarray,show_blocks=False, show_ellipse=False) -> np.ndarray:
 
     filtered_image = np.zeros(image.shape)
 

@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import json
 
-from helper_functions.file_io import *
-from morph_filter_square import get_block 
-from gaussian_fitter import fit_gaussian
+from im_filtering.helper_functions.file_io import *
+from im_filtering.morph_filter_square import get_block 
+import im_filtering.gaussian_fitter as gf
 
 def parameters_as_dict(par):
 
@@ -39,10 +39,10 @@ def show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, ver
     plt.title(f"Subframe {block_idx}")
     plt.colorbar()
 
-    plt.figure()
-    plt.imshow(new_frame)
-    plt.title(f"New Frame {block_idx}")
-    plt.colorbar()
+    # plt.figure()
+    # plt.imshow(new_frame)
+    # plt.title(f"New Frame {block_idx}")
+    # plt.colorbar()
 
     plt.figure()
     plt.imshow(subframe - new_frame)
@@ -51,7 +51,7 @@ def show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, ver
 
     plt.show()
 
-def generate_strel_parameters(image, n_rows = 12, n_cols = 12) -> dict:
+def generate_strel_parameters(image, n_rows = 8, n_cols = 8, show_gauss=False, show_subframe=False, print_fit=False) -> dict:
 
     img_height, img_width = image.shape
 
@@ -79,11 +79,14 @@ def generate_strel_parameters(image, n_rows = 12, n_cols = 12) -> dict:
             psf_idx = np.argmax(subframe)
             psf_y, psf_x = np.unravel_index(psf_idx, subframe.shape)
 
-            results = fit_gaussian(subframe, square_length, int(psf_x), int(psf_y), verbose=False)
+            results = gf.fit_gaussian(subframe, square_length, int(psf_x), int(psf_y), verbose=print_fit)
             parameters = results[2]
 
+            if show_gauss:
+                gf.show_results(*results)
+
             fitted_gaussian = results[1] - parameters[0] #remove offset from Gaussian
-            show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, verbose=False)
+            show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, verbose=show_subframe)
 
             par_dict = parameters_as_dict(parameters)
 
@@ -95,7 +98,7 @@ def generate_strel_parameters(image, n_rows = 12, n_cols = 12) -> dict:
 
 def main():
 
-    file_names, path = get_directory_input()
+    file_names, path = get_directory_input("Input path to .fits file containing dot grid image")
 
     file_path = os.path.join(path, file_names[0])
 

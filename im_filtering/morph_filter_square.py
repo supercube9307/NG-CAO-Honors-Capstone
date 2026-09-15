@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage.morphology import white_tophat
 from skimage.morphology.footprints import footprint_rectangle
-from helper_functions.file_io import *
+from im_filtering.helper_functions.file_io import *
 
 # ----------------------------------------------------------------------
 # Config
