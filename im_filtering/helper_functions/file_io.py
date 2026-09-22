@@ -119,7 +119,7 @@ def check_folder(path_input: str, expected_file_type: str) -> tuple:
             print("Ingoring " + file)
 
         path_verified = True
-        return(path_input, file, path_verified)
+        return(path_input, file_names, path_verified)
     
     else:
         return()

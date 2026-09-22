@@ -40,7 +40,7 @@ def bp_correction(image: np.ndarray, bp_file_path = "local_data/Bad_Pixel_Calibr
         subframe = image[bp_y-fwidth//2:bp_y+fwidth//2][bp_x-fwidth//2:bp_x+fwidth//2]
 
         sum = np.sum(subframe) - image[bp_y][bp_x]
-        image[bp_y][bp_x] = sum/(image.size-1)
+        image[bp_y][bp_x] = sum/(subframe.size-1)
 
     return(image)
 

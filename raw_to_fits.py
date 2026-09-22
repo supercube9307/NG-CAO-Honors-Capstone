@@ -6,7 +6,7 @@ from im_filtering.helper_functions.file_io import *
 
 if __name__ == '__main__':
 
-    file_names, path_input = get_directory_input(expected_file_type="raw", allow_folder=False)
+    file_names, path_input = get_directory_input(expected_file_type="raw", allow_folder=True)
 
     for filename in file_names:
 
@@ -25,4 +25,4 @@ if __name__ == '__main__':
         
         fits_file_name = filename.split('.')[0]+'.fits'
         
-        write_fits_file(reshaped_raw_imarray, fits_file_name)
+        write_fits_file(reshaped_raw_imarray, fits_file_name, file_output_required=True)

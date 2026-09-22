@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 import im_filtering.bad_pixel_calibration as bp
-import im_filtering.non_uniformity_calibratrion as nuc
+import im_filtering.non_uniformity_calibration as nuc
 import im_filtering.morph_filter_ellipse as morph
 from im_filtering.helper_functions.file_io import *
 
@@ -26,7 +26,6 @@ def main():
     plt.figure()
     plt.imshow(image)
     plt.title("Original Image")
-    plt.colorbar
 
     plt.figure()
     plt.imshow(filtered_image)
