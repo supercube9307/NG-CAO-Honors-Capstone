@@ -1,14 +1,14 @@
 from astropy.io import fits
 import numpy as np
 import os
-from im_filtering.helper_functions.file_io import get_directory_input
+from im_filtering.helper_functions.file_io import *
         
-def average_fits(file_names, path_input):
+def average_fits(file_names, path_input) -> np.ndarray:
     
     averages = []
     for file in file_names:
     
-        print("Converting " + file)
+        print("Including " + file)
         file_path =  path_input+"/"+file
 
         with fits.open(file_path) as hdul:
@@ -24,18 +24,37 @@ def average_fits(file_names, path_input):
     
     return averages
 
+def longest_common_substring(strings) -> str:
+    if not strings:
+        return ""
+    
+    # 1. Start with the shortest string to minimize iterations
+    shortest = min(strings, key=len)
+    length = len(shortest)
+    
+    # 2. Check substrings from largest to smallest window size
+    for width in range(length, 0, -1):
+        for start in range(length - width + 1):
+            substr = shortest[start:start + width]
+            
+            # 3. Verify if it exists in all other strings
+            if all(substr in s for s in strings):
+                return substr
+                
+    return ""
+
 
 if __name__ == '__main__':
     
-    file_names, path_input = get_directory_input()
+    file_names, path_input = get_directory_input(allow_folder=True)
 
-    averages = average_fits(file_names, path_input)
-    average_filepath = os.path.join(path_input,"Average_Output.fits")
+    average = average_fits(file_names, path_input)
 
-    hdu = fits.ImageHDU(averages)
-    prim = fits.PrimaryHDU()
-    hdul_ouptut = fits.HDUList([prim,hdu])
+    trimmed_filenames = []
+    for file_name in file_names:
+        trimmed_filenames.append(file_name.split(".")[0])
     
-    hdul_ouptut.writeto(average_filepath, overwrite=True)
+    average_filename = longest_common_substring(trimmed_filenames)+"average.fits"
+    average_filepath = os.path.join(path_input,average_filename)
 
-    print("Wrote to file "+average_filepath)
+    write_fits_file(average, average_filepath)
