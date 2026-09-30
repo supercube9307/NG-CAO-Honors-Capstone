@@ -64,7 +64,7 @@ def bp_detection(verbose=False, bp_file_path = "local_data/Bad_Pixel_Calibration
     if verbose:
         pretty_output(bp_locs)
 
-    write_csv_file(bp_locs, file_name=bp_file_path)
+    write_csv_file(bp_locs, file_path=bp_file_path)
 
 def main():
 

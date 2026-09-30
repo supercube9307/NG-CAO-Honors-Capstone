@@ -20,28 +20,26 @@ def ask_file_output() -> bool:
 
     return(file_output_required)
 
-def prep_file_write(file_name, file_output_required):
+def prep_file_write(file_path, file_output_required):
 
     # if file output is not mandatory, as user if they would like to save to a file
     if file_output_required == False:
-
         file_output_required = ask_file_output()
 
-    # add 'local_data/' to file_name if not present
-    if file_name.split(os.path.sep)[0] != "local_data":
+    # add 'local_data/' to file_path if not present
+    if file_path.split(os.path.sep)[0] != "local_data":
+        file_name = file_path.split(os.path.sep)[-1]
         file_path = os.path.join("local_data",file_name)
-    else:
-        file_path = file_name
 
     return(file_path, file_output_required)
 
-def write_fits_file(array: np.ndarray, file_name: str, file_output_required=False):
+def write_fits_file(data: np.ndarray, file_path: str, file_output_required=False):
 
-    file_path, file_output_required = prep_file_write(file_name, file_output_required)
+    file_path, file_output_required = prep_file_write(file_path, file_output_required)
 
     if file_output_required:
 
-        hdu = fits.ImageHDU(array)
+        hdu = fits.ImageHDU(data)
         prim = fits.PrimaryHDU()
         hdu_list = fits.HDUList([prim,hdu])
         
@@ -49,9 +47,9 @@ def write_fits_file(array: np.ndarray, file_name: str, file_output_required=Fals
 
         print(f"Wrote to: " + os.path.join(os.getcwd(), file_path))
 
-def write_csv_file(output_list, file_name="output.csv",file_output_required=False):
+def write_csv_file(output_list, file_path,file_output_required=False):
 
-    file_path, file_output_required = prep_file_write(file_name, file_output_required)
+    file_path, file_output_required = prep_file_write(file_path, file_output_required)
             
     if file_output_required:
 
@@ -124,7 +122,7 @@ def check_folder(path_input: str, expected_file_type: str) -> tuple:
     else:
         return()
 
-def get_directory_input(expected_file_type="fits",message="", allow_folder=False) -> tuple:
+def get_directory_input(expected_file_type="fits",message="", allow_folder=False) -> tuple[list, str]:
 
     if expected_file_type[0] == ".":
         expected_file_type = expected_file_type.lstrip(".")

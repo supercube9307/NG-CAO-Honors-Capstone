@@ -1,4 +1,3 @@
-from astropy.io import fits
 import numpy as np
 import os
 from im_filtering.helper_functions.file_io import *
@@ -13,17 +12,17 @@ if __name__ == '__main__':
 
     for filename in file_names:
 
-        print("Converting " + filename)
-
         if os.path.isdir(path_input):
             filename = os.path.join(path_input, filename)
 
         try:
             raw_imarray = np.fromfile(filename, dtype='uint16')
             reshaped_raw_imarray = np.reshape(raw_imarray, (1944,2592))
+            print(f"{filename} is a 16 bit file")
         except ValueError:
             raw_imarray = np.fromfile(filename, dtype='uint8')
             reshaped_raw_imarray = np.reshape(raw_imarray, (1944,2592))
+            print(f"{filename} is an 8 bit file")
 
         im_arrays.append(raw_imarray)
         fits_file_names.append(filename.split('.')[0]+'.fits')

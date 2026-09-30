@@ -5,28 +5,28 @@ from im_filtering.helper_functions.file_io import *
         
 def average_fits(file_names, path_input) -> np.ndarray:
     
-    averages = []
+    frames = []
     for file in file_names:
     
         print("Including " + file)
-        file_path =  path_input+"/"+file
+        file_path =  os.path.join(path_input,file)
 
-        with fits.open(file_path) as hdul:
-            x_length = int(hdul[1].header["NAXIS1"]) # type: ignore
-            y_length = int(hdul[1].header["NAXIS2"]) # type: ignore
+        frame = read_fits_file(file_path)
+        frames.append(frame)
 
-            if len(averages) == 0:
-                averages = np.zeros((y_length,x_length))
+    total = np.zeros(frames[0].shape)
 
-            averages = np.add(averages,hdul[1].data) # type: ignore
+    for frame in frames:
+        total += frame
 
-        averages /= len(file_names)
+    average = total / len(frames)
     
-    return averages
+    return(average)
 
 def longest_common_substring(strings) -> str:
+    default_output = "output"
     if not strings:
-        return ""
+        return default_output
     
     # 1. Start with the shortest string to minimize iterations
     shortest = min(strings, key=len)
@@ -41,8 +41,7 @@ def longest_common_substring(strings) -> str:
             if all(substr in s for s in strings):
                 return substr
                 
-    return ""
-
+    return default_output
 
 if __name__ == '__main__':
     
@@ -54,7 +53,7 @@ if __name__ == '__main__':
     for file_name in file_names:
         trimmed_filenames.append(file_name.split(".")[0])
     
-    average_filename = longest_common_substring(trimmed_filenames)+"average.fits"
+    average_filename = longest_common_substring(trimmed_filenames)+"_average.fits"
     average_filepath = os.path.join(path_input,average_filename)
 
     write_fits_file(average, average_filepath)

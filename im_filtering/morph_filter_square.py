@@ -77,14 +77,14 @@ _register([49, 61, 73, 85], 11)
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
-def get_block(image, row_idx, col_idx, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W):
+def get_block(image: np.ndarray, row_idx: int, col_idx: int, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W) -> np.ndarray:
     """Extract block (row_idx, col_idx) using 1-based MATLAB-style indexing."""
     r0 = (row_idx) * BLOCK_H
     c0 = (col_idx) * BLOCK_W
     return image[r0:r0 + BLOCK_H, c0:c0 + BLOCK_W]
 
 
-def set_block(dest, row_idx, col_idx, block, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W):
+def set_block(dest: np.ndarray, row_idx:int, col_idx:int, block, BLOCK_H = BLOCK_H, BLOCK_W = BLOCK_W):
     """Write block (row_idx, col_idx) into dest using 1-based indexing."""
     r0 = (row_idx) * BLOCK_H
     c0 = (col_idx) * BLOCK_W
