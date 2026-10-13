@@ -13,8 +13,9 @@ def parameters_as_dict(par):
     y0 = par[4]
     sigmax = par[5]
     sigmay = par[6]
+    res = par[7]
 
-    dict = {'amplitude':amplitude, 'theta':theta, 'x0':x0, 'y0':y0, 'sigmax':sigmax, 'sigmay':sigmay}
+    dict = {'amplitude':amplitude, 'theta':theta, 'x0':x0, 'y0':y0, 'sigmax':sigmax, 'sigmay':sigmay, 'res': res}
 
     return(dict)
 
@@ -75,18 +76,30 @@ def generate_strel_parameters(image, n_rows = 8, n_cols = 8, show_gauss=False, s
             subframe = subframe[half: block_height - half, half: block_width - half]
             subframe = np.pad(subframe, half)
 
-            # find brightest PSF per subframe
-            psf_idx = np.argmax(subframe)
-            psf_y, psf_x = np.unravel_index(psf_idx, subframe.shape)
+            psf_valid = False
+            while psf_valid == False:
 
-            results = gf.fit_gaussian(subframe, square_length, int(psf_x), int(psf_y), verbose=print_fit)
-            parameters = results[2]
+                psf_idx = np.argmax(subframe)
+                psf_y, psf_x = np.unravel_index(psf_idx, subframe.shape)
+
+                results = gf.fit_gaussian(subframe, square_length, int(psf_x), int(psf_y), verbose=print_fit)
+                fitted_gaussian = results[1]
+                parameters = results[2]
+
+                fit_region = subframe[psf_y-half:psf_y+half, psf_x-half:psf_x+half]
+                residuals = fit_region-fitted_gaussian
+                res = np.sum(residuals ** 2)
+
+                if res > 500:
+                    subframe[psf_y-half:psf_y+half, psf_x-half:psf_x+half] = np.zeros(fit_region.shape)
+                else:
+                    psf_valid = True
+
+            parameters = np.append(parameters, res)
 
             if show_gauss:
                 gf.show_results(*results)
-
-            fitted_gaussian = results[1] - parameters[0] #remove offset from Gaussian
-            show_residuals(subframe, fitted_gaussian, half, psf_x, psf_y, block_idx, verbose=show_subframe)
+            show_residuals(subframe, fitted_gaussian - parameters[0], half, psf_x, psf_y, block_idx, verbose=show_subframe)
 
             par_dict = parameters_as_dict(parameters)
 

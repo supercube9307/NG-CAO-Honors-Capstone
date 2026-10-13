@@ -139,6 +139,7 @@ def fit_gaussian(image: np.ndarray, square_length: int, psf_x: int, psf_y: int, 
         ftol=1e-7,
         xtol=1e-7,
     )
+    
     par_frame_fit = result.x
     par_frame_fit[2] = np.mod(par_frame_fit[2], 2*np.pi)
 
