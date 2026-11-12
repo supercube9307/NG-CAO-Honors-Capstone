@@ -33,11 +33,11 @@ def main():
     filtered_image = combined_filtering(image)
 
     plt.figure()
-    plt.imshow(image)
+    plt.imshow(image, vmax =5000)
     plt.title("Original Image")
 
     plt.figure()
-    plt.imshow(filtered_image)
+    plt.imshow(filtered_image, vmax = 2500)
     plt.title("Filtered Image")
     plt.colorbar
     plt.show()    

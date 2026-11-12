@@ -8,7 +8,7 @@ from im_filtering.morph_filter_calibration import main as morph_cal
 from im_filtering.morph_filter_square import get_block
 from im_filtering.morph_filter_square import set_block
 
-def ellipse_from_parameters(par, show_ellipse=False, n_sigma = 2) -> np.ndarray:
+def ellipse_from_parameters(par, show_ellipse=False, n_sigma = 3) -> np.ndarray:
 
     theta = par['theta']
     sigmax = par['sigmax']
@@ -110,7 +110,7 @@ def morph_filter_image_ellipse(image: np.ndarray,show_blocks=False, show_ellipse
 
     if len(pars_list) == 0:
         # ask user to generate strel parameters file
-        return
+        return # type: ignore
 
     block_height = img_height // n_rows
     block_width = img_width // n_cols
